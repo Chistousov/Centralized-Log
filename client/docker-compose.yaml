@@ -1,0 +1,152 @@
+version: "2.4"
+
+services:
+  centralized-log-fluent-bit-1:
+    image: chistousov/fluent-bit:1.0.0
+    container_name: centralized-log-fluent-bit-1
+    environment:
+      HOSTNAME: ${HOSTNAME}
+      CLIENT_ID: ${CLIENT_ID}
+      LDAP_DOMAIN_UPPER: ${LDAP_DOMAIN_UPPER}
+    mem_limit: 128M
+    restart: unless-stopped
+    volumes:
+    
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: fluent-bit-confs/fluent-bit.conf
+        target: /fluent-bit/etc/fluent-bit.conf
+        read_only: true
+
+      - type: bind
+        source: fluent-bit-confs
+        target: /fluent-bit-confs
+        read_only: true
+
+      - type: bind
+        source: kafka-client
+        target: /kafka-client
+        read_only: true
+
+      - type: bind
+        source: kafka-client/ssl_sasl/krb5.conf
+        target: /etc/krb5.conf
+        read_only: true
+    extra_hosts:
+      - "kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+      - "kerberos.kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+  
+  centralized-log-fluent-bit-2:
+    image: chistousov/fluent-bit:1.0.0
+    container_name: centralized-log-fluent-bit-2
+    environment:
+      HOSTNAME: ${HOSTNAME}
+      CLIENT_ID: ${CLIENT_ID}
+      LDAP_DOMAIN_UPPER: ${LDAP_DOMAIN_UPPER}
+    mem_limit: 128M
+    restart: unless-stopped
+    volumes:
+    
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: fluent-bit-confs/fluent-bit.conf
+        target: /fluent-bit/etc/fluent-bit.conf
+        read_only: true
+
+      - type: bind
+        source: fluent-bit-confs
+        target: /fluent-bit-confs
+        read_only: true
+
+      - type: bind
+        source: kafka-client
+        target: /kafka-client
+        read_only: true
+
+      - type: bind
+        source: kafka-client/ssl_sasl/krb5.conf
+        target: /etc/krb5.conf
+        read_only: true
+    extra_hosts:
+      - "kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+      - "kerberos.kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+
+  centralized-log-load-balancing-fluent-bit-nginx:
+    image: nginx:1.23.4-bullseye
+    container_name: centralized-log-load-balancing-fluent-bit-nginx
+    volumes:
+    
+      - type: bind
+        source: nginx-fluent-bit.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:24224:24224
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 128M
+    depends_on:
+      centralized-log-fluent-bit-1:
+        condition: service_started
+      centralized-log-fluent-bit-2:
+        condition: service_started
+
+  
+  test-log-nginx:
+    image: nginx:1.23.4-bullseye
+    container_name: test-log-nginx
+    volumes:
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    restart: unless-stopped
+    ports:
+      - 9567:80
+    mem_limit: 128M
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: "my-custom-group-apps/prod"
+        fluentd-async: "true"
+    depends_on:
+      centralized-log-load-balancing-fluent-bit-nginx:
+        condition: service_started

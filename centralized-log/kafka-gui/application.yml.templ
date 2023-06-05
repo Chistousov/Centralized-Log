@@ -1,0 +1,26 @@
+akhq:
+  connections:
+    log:
+      properties:
+        bootstrap.servers: "centralized-log-kafka1:9562,centralized-log-kafka2:9562,centralized-log-kafka3:9562"
+        security.protocol: SASL_SSL
+        ssl.keystore.location: /keystore/centralized-log-kafka-gui.keystore.p12
+        ssl.keystore.password: ${KAFKA_GUI_KEYSTORE_PASSWORD}
+        ssl.keystore.type: "PKCS12"
+        ssl.truststore.location: /keystore/centralized-log-kafka-gui.truststore.p12
+        ssl.truststore.password: ${KAFKA_GUI_TRUSTSTORE_PASSWORD}
+        ssl.truststore.type: "PKCS12"
+        sasl.mechanism: PLAIN
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="${KAFKA_ADMIN_SASL_PASSWORD}";
+  security:
+    default-group: no-roles
+    basic-auth:
+    - username: admin
+      password: "${KAFKA_GUI_ADMIN_PASSWORD_HASH}"
+      passwordHash: BCRYPT
+      groups:
+      - admin
+
+micronaut:
+  security:
+    enabled: true

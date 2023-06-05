@@ -1,0 +1,16 @@
+**/ca.key
+**/ca.crt
+**/ca.srl
+
+**/cert/
+**/keystore/
+
+zookeeper/zookeeper_jaas.conf
+
+kafka/client_zookeeper_jaas.conf
+kafka/krb5.conf
+kafka/*.keytab
+
+kafka-gui/application.yml
+
+clients/

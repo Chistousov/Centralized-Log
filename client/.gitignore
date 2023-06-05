@@ -1,0 +1,9 @@
+.env
+
+kafka-client/ssl_sasl/*.key
+kafka-client/ssl_sasl/*.crt
+kafka-client/ssl_sasl/*.keytab
+kafka-client/ssl_sasl/*.csr
+kafka-client/ssl_sasl/v3-*.ext
+kafka-client/ssl_sasl/ca.crt
+kafka-client/ssl_sasl/krb5.conf

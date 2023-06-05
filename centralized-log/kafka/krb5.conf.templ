@@ -1,0 +1,11 @@
+[libdefaults]
+    default_realm = ${LDAP_DOMAIN_UPPER}
+    forwardable = TRUE
+    udp_preference_limit = 1
+[realms]
+    ${LDAP_DOMAIN_UPPER} = {
+        kdc = kerberos.kafka.logs.com:750
+    }
+[domain_realm]
+    kerberos.kafka.logs.com = ${LDAP_DOMAIN_UPPER}
+    kafka.logs.com = ${LDAP_DOMAIN_UPPER}

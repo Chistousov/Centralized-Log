@@ -1,0 +1,2008 @@
+version: "2.4"
+
+services:
+
+  centralized-log-elasticsearch1:
+    image: elasticsearch:${ELASTICSEARCH_STACK_VERSION}
+    container_name: centralized-log-elasticsearch1
+    user: "1005"
+    volumes:
+      - type: bind
+        source: CAElasticsearch/ca.crt
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+        read_only: true
+
+      - type: bind
+        source: elasticsearch/cert
+        target: /usr/share/elasticsearch/config/certs/node
+        read_only: true
+
+      - type: volume
+        source: elasticsearch1-data-volume
+        target: /usr/share/elasticsearch/data
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    environment:
+      - node.name=centralized-log-elasticsearch1
+      - cluster.name=${ELASTICSEARCH_CLUSTER_NAME}
+      - cluster.initial_master_nodes=centralized-log-elasticsearch1,centralized-log-elasticsearch2,centralized-log-elasticsearch3,centralized-log-elasticsearch4
+      - discovery.seed_hosts=centralized-log-elasticsearch2,centralized-log-elasticsearch3,centralized-log-elasticsearch4
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      
+      # user connection
+      # подключение пользователя
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.client_authentication=required
+      - xpack.security.http.ssl.verification_mode=certificate
+
+      - xpack.security.http.ssl.key=certs/node/centralized-log-elasticsearch1.key
+      - xpack.security.http.ssl.certificate=certs/node/centralized-log-elasticsearch1.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca.crt
+      
+      # exchange among themselves
+      # обмен между собой
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.client_authentication=required
+      - xpack.security.transport.ssl.verification_mode=certificate
+
+      - xpack.security.transport.ssl.key=certs/node/centralized-log-elasticsearch1.key
+      - xpack.security.transport.ssl.certificate=certs/node/centralized-log-elasticsearch1.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca.crt
+      
+      - xpack.license.self_generated.type=${ELASTICSEARCH_LICENSE}
+
+      - ingest.geoip.downloader.enabled=false
+
+      # use * for delete index 
+      - action.destructive_requires_name=false
+    mem_limit: 1G
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "nc -z localhost 9200 || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  centralized-log-elasticsearch2:
+    image: elasticsearch:${ELASTICSEARCH_STACK_VERSION}
+    container_name: centralized-log-elasticsearch2
+    user: "1005"
+    volumes:
+      - type: bind
+        source: CAElasticsearch/ca.crt
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+        read_only: true
+
+      - type: bind
+        source: elasticsearch/cert
+        target: /usr/share/elasticsearch/config/certs/node
+        read_only: true
+
+      - type: volume
+        source: elasticsearch2-data-volume
+        target: /usr/share/elasticsearch/data
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+    environment:
+      - node.name=centralized-log-elasticsearch2
+      - cluster.name=${ELASTICSEARCH_CLUSTER_NAME}
+      - cluster.initial_master_nodes=centralized-log-elasticsearch1,centralized-log-elasticsearch2,centralized-log-elasticsearch3,centralized-log-elasticsearch4
+      - discovery.seed_hosts=centralized-log-elasticsearch1,centralized-log-elasticsearch3,centralized-log-elasticsearch4
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.client_authentication=required
+      - xpack.security.http.ssl.verification_mode=certificate
+
+      - xpack.security.http.ssl.key=certs/node/centralized-log-elasticsearch2.key
+      - xpack.security.http.ssl.certificate=certs/node/centralized-log-elasticsearch2.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca.crt
+      
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.client_authentication=required
+      - xpack.security.transport.ssl.verification_mode=certificate
+
+      - xpack.security.transport.ssl.key=certs/node/centralized-log-elasticsearch2.key
+      - xpack.security.transport.ssl.certificate=certs/node/centralized-log-elasticsearch2.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca.crt
+      
+      - xpack.license.self_generated.type=${ELASTICSEARCH_LICENSE}
+      - ingest.geoip.downloader.enabled=false
+
+      - action.destructive_requires_name=false
+    mem_limit: 1G
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "nc -z localhost 9200 || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  centralized-log-elasticsearch3:
+    image: elasticsearch:${ELASTICSEARCH_STACK_VERSION}
+    container_name: centralized-log-elasticsearch3
+    user: "1005"
+    volumes:
+      - type: bind
+        source: CAElasticsearch/ca.crt
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+        read_only: true
+
+      - type: bind
+        source: elasticsearch/cert
+        target: /usr/share/elasticsearch/config/certs/node
+        read_only: true
+
+      - type: volume
+        source: elasticsearch3-data-volume
+        target: /usr/share/elasticsearch/data
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+    environment:
+      - node.name=centralized-log-elasticsearch3
+      - cluster.name=${ELASTICSEARCH_CLUSTER_NAME}
+      - cluster.initial_master_nodes=centralized-log-elasticsearch1,centralized-log-elasticsearch2,centralized-log-elasticsearch3,centralized-log-elasticsearch4
+      - discovery.seed_hosts=centralized-log-elasticsearch1,centralized-log-elasticsearch2,centralized-log-elasticsearch4
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.client_authentication=required
+      - xpack.security.http.ssl.verification_mode=certificate
+
+      - xpack.security.http.ssl.key=certs/node/centralized-log-elasticsearch3.key
+      - xpack.security.http.ssl.certificate=certs/node/centralized-log-elasticsearch3.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca.crt
+      
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.client_authentication=required
+      - xpack.security.transport.ssl.verification_mode=certificate
+
+      - xpack.security.transport.ssl.key=certs/node/centralized-log-elasticsearch3.key
+      - xpack.security.transport.ssl.certificate=certs/node/centralized-log-elasticsearch3.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca.crt
+      
+      - xpack.license.self_generated.type=${ELASTICSEARCH_LICENSE}
+      - ingest.geoip.downloader.enabled=false
+
+      - action.destructive_requires_name=false
+    mem_limit: 1G
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "nc -z localhost 9200 || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  centralized-log-elasticsearch4:
+    image: elasticsearch:${ELASTICSEARCH_STACK_VERSION}
+    container_name: centralized-log-elasticsearch4
+    user: "1005"
+    volumes:
+      - type: bind
+        source: CAElasticsearch/ca.crt
+        target: /usr/share/elasticsearch/config/certs/ca.crt
+        read_only: true
+
+      - type: bind
+        source: elasticsearch/cert
+        target: /usr/share/elasticsearch/config/certs/node
+        read_only: true
+
+      - type: volume
+        source: elasticsearch4-data-volume
+        target: /usr/share/elasticsearch/data
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+    environment:
+      - node.name=centralized-log-elasticsearch4
+      - cluster.name=${ELASTICSEARCH_CLUSTER_NAME}
+      - cluster.initial_master_nodes=centralized-log-elasticsearch1,centralized-log-elasticsearch2,centralized-log-elasticsearch3,centralized-log-elasticsearch4
+      - discovery.seed_hosts=centralized-log-elasticsearch1,centralized-log-elasticsearch2,centralized-log-elasticsearch3
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.client_authentication=required
+      - xpack.security.http.ssl.verification_mode=certificate
+
+      - xpack.security.http.ssl.key=certs/node/centralized-log-elasticsearch4.key
+      - xpack.security.http.ssl.certificate=certs/node/centralized-log-elasticsearch4.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca.crt
+      
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.client_authentication=required
+      - xpack.security.transport.ssl.verification_mode=certificate
+
+      - xpack.security.transport.ssl.key=certs/node/centralized-log-elasticsearch4.key
+      - xpack.security.transport.ssl.certificate=certs/node/centralized-log-elasticsearch4.crt
+      - xpack.security.transport.ssl.certificate_authorities=certs/ca.crt
+      
+      - xpack.license.self_generated.type=${ELASTICSEARCH_LICENSE}
+      - ingest.geoip.downloader.enabled=false
+
+      - action.destructive_requires_name=false
+
+    mem_limit: 1G
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "nc -z localhost 9200 || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # # restore grafana postgresql
+  # centralized-log-restore-grafana-oss-postgresql-backup-db:
+  #   image: alpine:3.18.0
+  #   entrypoint: ["/bin/sh", "-c", "/restore-backup.sh && touch /OK"] 
+  #   restart: on-failure
+  #   container_name: centralized-log-restore-grafana-oss-postgresql-backup-db
+  #   volumes:
+      
+  #     - type: bind
+  #       source: restore-backup.sh
+  #       target: /restore-backup.sh
+  #       read_only: true
+
+  #     - type: volume
+  #       source: grafana-oss-postgresql-backup-volume
+  #       target: /archive
+
+  #     - type: volume
+  #       source: grafana-oss-postgresql-volume
+  #       target: /backup
+  #   healthcheck:
+  #     test: '[ -f ./OK ] || exit 1'
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 100
+
+  # # backup grafana postgresql
+  # centralized-log-grafana-oss-postgresql-backup-db:
+  #   image: offen/docker-volume-backup:v2.27.0
+  #   restart: always
+  #   container_name: centralized-log-grafana-oss-postgresql-backup-db
+  #   environment:
+  #     - BACKUP_CRON_EXPRESSION=0 3 * * 1
+  #     - BACKUP_FILENAME=grafana-oss-postgresql-backup-db-%Y-%m-%dT%H-%M-%S.tar.gz
+  #     - BACKUP_RETENTION_DAYS=30
+  #     # - NOTIFICATION_URLS=smtp://somesmtp:25/?fromAddress=backup@example.com&toAddresses=chistousov@example.com
+  #     - EXEC_FORWARD_OUTPUT=true
+  #     - BACKUP_STOP_CONTAINER_LABEL=grafana-oss-postgresql-backup-stop-label
+  #   volumes:
+  #     # что backupИТЬ
+  #     - type: volume
+  #       source: grafana-oss-postgresql-volume
+  #       target: /backup
+  #       read_only: true
+      
+  #     - type: bind
+  #       source: /var/run/docker.sock
+  #       target: /var/run/docker.sock
+  #       read_only: true
+
+  #     # куда backupИТЬ
+  #     - type: volume
+  #       source: grafana-oss-postgresql-backup-volume
+  #       target: /archive
+
+  #     - type: bind
+  #       source: /etc/timezone
+  #       target: /etc/timezone
+  #       read_only: true
+
+  #     - type: bind
+  #       source: /etc/localtime
+  #       target: /etc/localtime
+  #       read_only: true
+  
+
+  centralized-log-grafana-oss-postgresql:
+    image: postgres:14.5-bullseye
+    container_name: centralized-log-grafana-oss-postgresql
+    environment:
+      - POSTGRES_USER=grafana_oss
+      - POSTGRES_PASSWORD=${GRAFANA_OSS_POSTGRES_PASSWORD}
+      - POSTGRES_DB=grafana_oss
+    volumes:
+      - type: bind
+        source: grafana/postgresql.conf
+        target: /etc/postgresql/postgresql.conf
+        read_only: true
+      
+      - type: volume
+        source: grafana-oss-postgresql-volume
+        target: /var/lib/postgresql/data
+      
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 512M
+    command: -c 'config_file=/etc/postgresql/postgresql.conf'
+    labels:
+      # This means the container will be stopped during backup to ensure
+      # backup integrity. You can omit this label if stopping during backup
+      # not required.
+      - docker-volume-backup.stop-during-backup=grafana-oss-postgresql-backup-stop-label
+    healthcheck:
+      test: "pg_isready -U grafana_oss"
+      interval: 10s
+      timeout: 1m
+      retries: 5
+    # depends_on:
+    #   centralized-log-restore-grafana-oss-postgresql-backup-db:
+    #     condition: service_completed_successfully
+    networks:
+      - app-network
+
+  centralized-log-grafana-oss:
+    depends_on:
+      centralized-log-grafana-oss-postgresql:
+        condition: service_healthy
+      centralized-log-elasticsearch1:
+        condition: service_healthy
+      centralized-log-elasticsearch2:
+        condition: service_healthy
+      centralized-log-elasticsearch3:
+        condition: service_healthy
+      centralized-log-elasticsearch4:
+        condition: service_healthy
+    image: grafana/grafana-oss:9.3.2
+    container_name: centralized-log-grafana-oss
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 512m
+    environment:
+      - GF_SERVER_ROOT_URL=${GRAFANA_OSS_SERVER_URL}
+      # db
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=centralized-log-grafana-oss-postgresql:5432
+      - GF_DATABASE_NAME=grafana_oss
+      - GF_DATABASE_USER=grafana_oss
+      - GF_DATABASE_PASSWORD=${GRAFANA_OSS_POSTGRES_PASSWORD}
+      
+      - GF_SECURITY_COOKIE_SECURE=true
+
+      # email
+      # - GF_SMTP_ENABLED=true
+      # - GF_SMTP_HOST=somesmtp:25
+      
+      - ELASTIC_SERVER=centralized-log-elasticsearch1
+      - ELASTIC_SERVER_URL=https://centralized-log-elasticsearch1:9200
+      - ELASTIC_BASIC_USER=elastic
+      - ELASTIC_BASIC_PASS=${ELASTIC_PASSWORD}
+
+    user: "1005"
+    volumes:
+      - type: volume
+        source: grafana-oss-storage-volume
+        target: /var/lib/grafana
+      
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      
+      # grafana predefinitions (e.g. data sources)
+      # предопределения для grafana (например источники данных)
+      - type: bind
+        source: grafana/provisioning
+        target: /etc/grafana/provisioning
+        read_only: true
+
+      - type: bind
+        source: CAElasticsearch/ca.crt
+        target: /ca.crt
+        read_only: true
+      
+      - type: bind
+        source: grafana/cert
+        target: /cert
+        read_only: true
+        
+    networks:
+      - app-network
+      - nginx-network
+    labels:
+      # This means the container will be stopped during backup to ensure
+      # backup integrity. You can omit this label if stopping during backup
+      # not required.
+      - docker-volume-backup.stop-during-backup=grafana-oss-postgresql-backup-stop-label
+  
+  centralized-log-fluentd1:
+    depends_on:
+      centralized-log-kafka1:
+        condition: service_healthy
+      centralized-log-kafka2:
+        condition: service_healthy
+      centralized-log-kafka3:
+        condition: service_healthy
+      centralized-log-kafka-init:
+        condition: service_completed_successfully
+      centralized-log-elasticsearch1:
+        condition: service_healthy
+      centralized-log-elasticsearch2:
+        condition: service_healthy
+      centralized-log-elasticsearch3:
+        condition: service_healthy
+      centralized-log-elasticsearch4:
+        condition: service_healthy
+    image: chistousov/fluentd:1.0.0
+    container_name: centralized-log-fluentd1
+    restart: unless-stopped
+    environment:
+      KAFKA_SSL_CA: /ca-kafka.crt
+      KAFKA_SSL_CLIENT_CRT: /cert/centralized-log-fluentd1-kafka.crt
+      KAFKA_SSL_CLIENT_KEY: /cert/centralized-log-fluentd1-kafka.key
+      
+      KAFKA_PLAIN_USER: admin
+      KAFKA_PLAIN_PASSWORD: ${KAFKA_ADMIN_SASL_PASSWORD}
+      
+      ELASTIC_USER: elastic
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+
+      ELASTIC_SSL_CA: /ca-elasticsearch.crt
+      ELASTIC_SSL_CLIENT_CRT: /cert/centralized-log-fluentd1-elasticsearch.crt
+      ELASTIC_SSL_CLIENT_KEY: /cert/centralized-log-fluentd1-elasticsearch.key
+
+    user: "1005"
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 512m
+    volumes:
+      # fluentd conf
+      - type: bind
+        source: fluentd/conf
+        target: /fluentd/etc
+        read_only: true
+      
+      - type: bind
+        source: fluentd/cert
+        target: /cert
+        read_only: true 
+
+      - type: bind
+        source: CAZooKeeperAndBetweenKafka/ca.crt
+        target: /ca-kafka.crt
+        read_only: true 
+
+      - type: bind
+        source: CAElasticsearch/ca.crt
+        target: /ca-elasticsearch.crt
+        read_only: true
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    networks:
+      - app-network
+  
+  centralized-log-fluentd2:
+    depends_on:
+      centralized-log-kafka1:
+        condition: service_healthy
+      centralized-log-kafka2:
+        condition: service_healthy
+      centralized-log-kafka3:
+        condition: service_healthy
+      centralized-log-kafka-init:
+        condition: service_completed_successfully
+      centralized-log-elasticsearch1:
+        condition: service_healthy
+      centralized-log-elasticsearch2:
+        condition: service_healthy
+      centralized-log-elasticsearch3:
+        condition: service_healthy
+      centralized-log-elasticsearch4:
+        condition: service_healthy
+    image: chistousov/fluentd:1.0.0
+    container_name: centralized-log-fluentd2
+    restart: unless-stopped
+    environment:
+      KAFKA_SSL_CA: /ca-kafka.crt
+      KAFKA_SSL_CLIENT_CRT: /cert/centralized-log-fluentd2-kafka.crt
+      KAFKA_SSL_CLIENT_KEY: /cert/centralized-log-fluentd2-kafka.key
+      
+      KAFKA_PLAIN_USER: admin
+      KAFKA_PLAIN_PASSWORD: ${KAFKA_ADMIN_SASL_PASSWORD}
+      
+      ELASTIC_USER: elastic
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+
+      ELASTIC_SSL_CA: /ca-elasticsearch.crt
+      ELASTIC_SSL_CLIENT_CRT: /cert/centralized-log-fluentd2-elasticsearch.crt
+      ELASTIC_SSL_CLIENT_KEY: /cert/centralized-log-fluentd2-elasticsearch.key
+
+    user: "1005"
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 512m
+    volumes:
+      # fluentd conf
+      - type: bind
+        source: fluentd/conf
+        target: /fluentd/etc
+        read_only: true
+      
+      - type: bind
+        source: fluentd/cert
+        target: /cert
+        read_only: true 
+
+      - type: bind
+        source: CAZooKeeperAndBetweenKafka/ca.crt
+        target: /ca-kafka.crt
+        read_only: true 
+
+      - type: bind
+        source: CAElasticsearch/ca.crt
+        target: /ca-elasticsearch.crt
+        read_only: true
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    networks:
+      - app-network
+
+  # # restore openldap config
+  # centralized-log-kafka-openldap-restore-config-backup-db:
+  #   image: alpine:3.18.0
+  #   entrypoint: ["/bin/sh", "-c", "/restore-backup.sh && touch /OK"] 
+  #   restart: on-failure
+  #   container_name: centralized-log-kafka-openldap-restore-config-backup-db
+  #   volumes:
+  #     - type: bind
+  #       source: restore-backup.sh
+  #       target: /restore-backup.sh
+  #       read_only: true
+
+  #     - type: volume
+  #       source: openldap-config-backup-volume
+  #       target: /archive
+
+  #     - type: volume
+  #       source: openldap-config-volume
+  #       target: /backup
+  #   healthcheck:
+  #     test: '[ -f ./OK ] || exit 1'
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 100
+
+  # # backup openldap config
+  # centralized-log-kafka-openldap-config-backup-db:
+  #   image: offen/docker-volume-backup:v2.27.0
+  #   restart: always
+  #   container_name: centralized-log-kafka-openldap-config-backup-db
+  #   environment:
+  #     - BACKUP_CRON_EXPRESSION=30 0 15 * *
+  #     - BACKUP_FILENAME=centralized-log-kafka-openldap-config-backup-db-%Y-%m-%dT%H-%M-%S.tar.gz
+  #     - BACKUP_RETENTION_DAYS=30
+  #     # - NOTIFICATION_URLS=smtp://somesmtp:25/?fromAddress=backup@example.com&toAddresses=chistousov@example.com
+  #     - EXEC_FORWARD_OUTPUT=true
+  #     - BACKUP_STOP_CONTAINER_LABEL=centralized-log-kafka-openldap-config-backup-db-stop-label
+  #   volumes:
+  #     # что backupИТЬ
+  #     - type: volume
+  #       source: openldap-config-volume
+  #       target: /backup
+  #       read_only: true
+      
+  #     - type: bind
+  #       source: /var/run/docker.sock
+  #       target: /var/run/docker.sock
+  #       read_only: true
+
+  #     # куда backupИТЬ
+  #     - type: volume
+  #       source: openldap-config-backup-volume
+  #       target: /archive
+
+  #     - type: bind
+  #       source: /etc/timezone
+  #       target: /etc/timezone
+  #       read_only: true
+
+  #     - type: bind
+  #       source: /etc/localtime
+  #       target: /etc/localtime
+  #       read_only: true
+
+  # # restore openldap db
+  # centralized-log-kafka-openldap-restore-database-backup-db:
+  #   image: alpine:3.18.0
+  #   entrypoint: ["/bin/sh", "-c", "/restore-backup.sh && touch /OK"] 
+  #   restart: on-failure
+  #   container_name: centralized-log-kafka-openldap-restore-database-backup-db
+  #   volumes:
+  #     - type: bind
+  #       source: restore-backup.sh
+  #       target: /restore-backup.sh
+  #       read_only: true
+
+  #     - type: volume
+  #       source: openldap-database-backup-volume
+  #       target: /archive
+
+  #     - type: volume
+  #       source: openldap-database-volume
+  #       target: /backup
+  #   healthcheck:
+  #     test: '[ -f ./OK ] || exit 1'
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 100
+
+  # # backup openldap db
+  # centralized-log-kafka-openldap-database-backup-db:
+  #   image: offen/docker-volume-backup:v2.27.0
+  #   restart: always
+  #   container_name: centralized-log-kafka-openldap-database-backup-db
+  #   environment:
+  #     - BACKUP_CRON_EXPRESSION=0 0 15 * *
+  #     - BACKUP_FILENAME=centralized-log-kafka-openldap-database-backup-db-%Y-%m-%dT%H-%M-%S.tar.gz
+  #     - BACKUP_RETENTION_DAYS=30
+  #     # - NOTIFICATION_URLS=smtp://somesmtp:25/?fromAddress=backup@example.com&toAddresses=chistousov@example.com
+  #     - EXEC_FORWARD_OUTPUT=true
+  #     - BACKUP_STOP_CONTAINER_LABEL=centralized-log-kafka-openldap-database-backup-db-stop-label
+  #   volumes:
+  #     # что backupИТЬ
+  #     - type: volume
+  #       source: openldap-database-volume
+  #       target: /backup
+  #       read_only: true
+      
+  #     - type: bind
+  #       source: /var/run/docker.sock
+  #       target: /var/run/docker.sock
+  #       read_only: true
+
+  #     # куда backupИТЬ
+  #     - type: volume
+  #       source: openldap-database-backup-volume
+  #       target: /archive
+
+  #     - type: bind
+  #       source: /etc/timezone
+  #       target: /etc/timezone
+  #       read_only: true
+
+  #     - type: bind
+  #       source: /etc/localtime
+  #       target: /etc/localtime
+  #       read_only: true
+
+  centralized-log-kafka-openldap:
+    image: osixia/openldap:latest
+    container_name: centralized-log-kafka-openldap
+    environment:
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
+      LDAP_DOMAIN: "${LDAP_DOMAIN}"
+      LDAP_BASE_DN: "${LDAP_BASE_DN}"
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD}
+      LDAP_READONLY_USER: true
+      LDAP_READONLY_USER_PASSWORD: ${LDAP_READONLY_USER_PASSWORD}
+    mem_limit: 512M
+    healthcheck:
+      test: '[ -e /run/slapd/slapd.pid ] || exit 1'
+      interval: 30s
+      timeout: 30s
+      retries: 100
+    volumes:
+
+      - type: volume
+        source: openldap-database-volume
+        target: /var/lib/ldap/
+
+      - type: volume
+        source: openldap-config-volume
+        target: /etc/ldap/slapd.d/
+
+      - type: volume
+        source: openldap-certs-volume
+        target: /container/service/slapd/assets/certs
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: ./openldap/init
+        target: /container/service/slapd/assets/config/bootstrap/ldif/custom
+        read_only: true
+
+    command: "--copy-service --loglevel debug"
+    labels:
+      # This means the container will be stopped during backup to ensure
+      # backup integrity. You can omit this label if stopping during backup
+      # not required.
+      - docker-volume-backup.stop-during-backup=centralized-log-kafka-openldap-config-backup-db-stop-label
+      - docker-volume-backup.stop-during-backup=centralized-log-kafka-openldap-database-backup-db-stop-label
+    restart: unless-stopped
+    # depends_on:
+    #   centralized-log-kafka-openldap-restore-config-backup-db:
+    #     condition: service_completed_successfully
+    #   centralized-log-kafka-openldap-restore-database-backup-db:
+    #     condition: service_completed_successfully
+    networks:
+      - kdc-network
+
+  # # restore kdc db
+  # centralized-log-kafka-kdc-restore-database-backup-db:
+  #   image: alpine:3.18.0
+  #   entrypoint: ["/bin/sh", "-c", "/restore-backup.sh && touch /OK"] 
+  #   restart: on-failure
+  #   container_name: centralized-log-kafka-kdc-restore-database-backup-db
+  #   volumes:
+  #     - type: bind
+  #       source: restore-backup.sh
+  #       target: /restore-backup.sh
+  #       read_only: true
+
+  #     - type: volume
+  #       source: kdc-backup-volume
+  #       target: /archive
+
+  #     - type: volume
+  #       source: kdc-volume
+  #       target: /backup
+  #   healthcheck:
+  #     test: '[ -f ./OK ] || exit 1'
+  #     interval: 1m
+  #     timeout: 10s
+  #     retries: 100
+
+  # # backup kdc db
+  # centralized-log-kafka-kdc-database-backup-db:
+  #   image: offen/docker-volume-backup:v2.27.0
+  #   restart: always
+  #   container_name: centralized-log-kafka-kdc-database-backup-db
+  #   environment:
+  #     - BACKUP_CRON_EXPRESSION=0 0 15 * *
+  #     - BACKUP_FILENAME=centralized-log-kafka-kdc-database-backup-db-%Y-%m-%dT%H-%M-%S.tar.gz
+  #     - BACKUP_RETENTION_DAYS=30
+  #     # - NOTIFICATION_URLS=smtp://somesmtp:25/?fromAddress=backup@example.com&toAddresses=chistousov@example.com
+  #     - EXEC_FORWARD_OUTPUT=true
+  #     - BACKUP_STOP_CONTAINER_LABEL=centralized-log-kafka-kdc-database-backup-db-stop-label
+  #   volumes:
+  #     # что backupИТЬ
+  #     - type: volume
+  #       source: kdc-volume
+  #       target: /backup
+  #       read_only: true
+      
+  #     - type: bind
+  #       source: /var/run/docker.sock
+  #       target: /var/run/docker.sock
+  #       read_only: true
+
+  #     # куда backupИТЬ
+  #     - type: volume
+  #       source: kdc-backup-volume
+  #       target: /archive
+
+  #     - type: bind
+  #       source: /etc/timezone
+  #       target: /etc/timezone
+  #       read_only: true
+
+  #     - type: bind
+  #       source: /etc/localtime
+  #       target: /etc/localtime
+  #       read_only: true
+
+  centralized-log-kafka-kdc:
+    image: chistousov/kerberos5:1.0.0
+    container_name: centralized-log-kafka-kdc
+    environment:
+
+      PORTS: 750
+
+      REALM: ${LDAP_DOMAIN_UPPER}
+      LDAP_BASE_DN: ${LDAP_BASE_DN}
+      ENCRYPTION_TYPE: ${ENCRYPTION_TYPE_1}
+      SUPPORTED_ENCRYPTION_TYPES: ${ENCRYPTION_TYPE_1}:normal
+      
+      LDAP_KDC_DN: cn=readonly,${LDAP_BASE_DN}
+      LDAP_KDC_DN_PASSWORD: ${LDAP_READONLY_USER_PASSWORD}
+
+      LDAP_KADMIND_DN: cn=admin,${LDAP_BASE_DN}
+      LDAP_KADMIND_DN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+
+      LDAP_KERBEROS_CONTAINER_DN: cn=krbContainer,${LDAP_BASE_DN}
+      LDAP_SERVER: ldap://centralized-log-kafka-openldap:389
+
+    ports:
+      - 750:750
+      # - 750:750/udp
+    mem_limit: 512M
+    volumes:
+
+      - type: bind
+        source: /dev/urandom
+        target: /dev/urandom
+        read_only: true
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: volume
+        source: kdc-volume
+        target: /etc/krb5kdc
+
+    restart: unless-stopped
+    healthcheck:
+      test: '[ -e /krb5kdc.pid ] || exit 1'
+      interval: 30s
+      timeout: 30s
+      retries: 100
+    labels:
+      # This means the container will be stopped during backup to ensure
+      # backup integrity. You can omit this label if stopping during backup
+      # not required.
+      - docker-volume-backup.stop-during-backup=centralized-log-kafka-kdc-database-backup-db-stop-label
+    depends_on:
+      centralized-log-kafka-openldap:
+        condition: service_healthy
+      # centralized-log-kafka-kdc-restore-database-backup-db:
+      #   condition: service_completed_successfully
+    networks:
+      - kdc-network
+    extra_hosts:
+      - "kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+      - "kerberos.kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+
+  centralized-log-kafka-zookeeper1:
+    image: ${REPOSITORY}/cp-zookeeper:${CONFLUENT_DOCKER_TAG}
+    restart: always
+    container_name: centralized-log-kafka-zookeeper1
+    user: "1005"
+    environment:
+      # client port without encryption (only for healthcheck)
+      # клиентский порт без шифрования (только для healthcheck)
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+      # the base unit of time in milliseconds used by ZooKeeper. It is used to perform heart beats and the minimum session timeout will be twice the tick time.
+      # базовая единица времени в миллисекундах, используемая ZooKeeper. Он используется для выполнения сердечных сокращений, и минимальное время ожидания сеанса будет в два раза больше времени тика.
+      ZOOKEEPER_TICK_TIME: 2000
+      
+      # SSL port for clients
+      # SSL порт для клиентов
+      ZOOKEEPER_SECURE_CLIENT_PORT: 2182
+      
+      # ZooKeeper runs on Netty
+      # ZooKeeper работает на Netty
+      ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
+      
+      # only encrypted connection for Quorum (cluster)
+      # только шифрованное соединение для Quorum (кластера)
+      ZOOKEEPER_SSL_QUORUM: 'true'
+      
+      # keystore
+      # хранилище ключей
+      ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper1.keystore.p12
+      ZOOKEEPER_SSL_KEYSTORE_PASSWORD: ${ZOOKEEPER_KEYSTORE_PASSWORD}
+      ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper1.truststore.p12
+      ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: ${ZOOKEEPER_TRUSTSTORE_PASSWORD}
+
+      ZOOKEEPER_SSL_QUORUM_KEYSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper1.keystore.p12
+      ZOOKEEPER_SSL_QUORUM_KEYSTORE_PASSWORD: ${ZOOKEEPER_KEYSTORE_PASSWORD}
+      ZOOKEEPER_SSL_QUORUM_TRUSTSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper1.truststore.p12
+      ZOOKEEPER_SSL_QUORUM_TRUSTSTORE_PASSWORD: ${ZOOKEEPER_TRUSTSTORE_PASSWORD}
+
+      # these are the timeouts that ZooKeeper uses to limit the amount of time ZooKeeper servers in a quorum must connect to the leader.
+      # это тайм-ауты, которые ZooKeeper использует для ограничения времени, в течение которого серверы ZooKeeper в кворуме должны подключаться к лидеру.
+      ZOOKEEPER_INIT_LIMIT: 5
+      # limits how outdated a server from the leader can be.
+      # ограничивает, насколько устаревшим может быть сервер от лидера.
+      ZOOKEEPER_SYNC_LIMIT: 2
+
+      # autopurge.snapRetainCount=3
+      # autopurge.purgeInterval=24
+
+      # When ZooKeeper's autopurge feature is enabled, it saves the most recent autopurge.snapRetainCount snapshots and corresponding transaction logs to dataDir and dataLogDir respectively, and discards the rest.
+      # Когда функция автоматической очистки ZooKeeper включена, она сохраняет самые последние снимки autopurge.snapRetainCount и соответствующие журналы транзакций в dataDir и dataLogDir соответственно и удаляет остальные.
+      ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT: 3
+      # The time interval, in hours, during which the cleanup task should run. Set the value to a positive integer (1 or higher) to enable automatic cleanup.
+      # Интервал времени в часах, в течение которого должна быть запущена задача очистки. Установите значение в положительное целое число (1 и выше), чтобы включить автоматическую очистку.
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: 24
+
+      # server.1=0.0.0.0:2888:3888
+      # server.2=centralized-log-kafka-zookeeper2:2888:3888
+      # server.3=centralized-log-kafka-zookeeper3:2888:3888
+
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_PEER_PORT: 2888
+      ZOOKEEPER_LEADER_PORT: 3888
+      ZOOKEEPER_SERVERS: 0.0.0.0:2888:3888;centralized-log-kafka-zookeeper2:2888:3888;centralized-log-kafka-zookeeper3:2888:3888
+
+      # TLS 1.2 is the tested-default - TLS 1.3 has not been tested for production
+      # You can evaluate TLS 1.3 for ZooKeeper by uncommenting the following two properties
+      # and setting KAFKA_ZOOKEEPER_SSL_PROTOCOL on brokers
+      ZOOKEEPER_SSL_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
+      ZOOKEEPER_SSL_QUORUM_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
+
+      # какие протоколы SSL/TLS тут поддерживаются
+      ZOOKEEPER_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      ZOOKEEPER_SSL_QUORUM_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+
+      # calling zookeeper requires SSL authentication and authorization
+      # для обращения к zookeeper требуется SSL аутентификация и авторизация
+      ZOOKEEPER_SSL_CLIENT_AUTH: need
+      ZOOKEEPER_SSL_QUORUM_CLIENT_AUTH: need
+      ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
+      
+      # additional SASL authentication. It is she who is used for ACL znode
+      # дополнительная SASL аутентификация. Для ACL znode используется именно она
+      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/zookeeper/secrets/zookeeper_jaas.conf
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 512M
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: zookeeper
+        target: /etc/zookeeper/secrets
+        read_only: true
+
+    healthcheck:
+      test: echo srvr | nc localhost 2181 || exit 1
+      retries: 20
+      interval: 10s
+
+    depends_on:
+      centralized-log-kafka-kdc:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  centralized-log-kafka-zookeeper2:
+    image: ${REPOSITORY}/cp-zookeeper:${CONFLUENT_DOCKER_TAG}
+    restart: always
+    depends_on:
+      centralized-log-kafka-zookeeper1:
+        condition: service_healthy
+    container_name: centralized-log-kafka-zookeeper2
+    user: "1005"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      
+      ZOOKEEPER_TICK_TIME: 2000
+      
+      ZOOKEEPER_SECURE_CLIENT_PORT: 2182
+      
+      ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
+      
+      ZOOKEEPER_SSL_QUORUM: 'true'
+      
+      ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper2.keystore.p12
+      ZOOKEEPER_SSL_KEYSTORE_PASSWORD: ${ZOOKEEPER_KEYSTORE_PASSWORD}
+      ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper2.truststore.p12
+      ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: ${ZOOKEEPER_TRUSTSTORE_PASSWORD}
+
+      ZOOKEEPER_SSL_QUORUM_KEYSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper2.keystore.p12
+      ZOOKEEPER_SSL_QUORUM_KEYSTORE_PASSWORD: ${ZOOKEEPER_KEYSTORE_PASSWORD}
+      ZOOKEEPER_SSL_QUORUM_TRUSTSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper2.truststore.p12
+      ZOOKEEPER_SSL_QUORUM_TRUSTSTORE_PASSWORD: ${ZOOKEEPER_TRUSTSTORE_PASSWORD}
+
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+
+      ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT: 3
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: 24
+
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_PEER_PORT: 2888
+      ZOOKEEPER_LEADER_PORT: 3888
+      ZOOKEEPER_SERVERS: centralized-log-kafka-zookeeper1:2888:3888;0.0.0.0:2888:3888;centralized-log-kafka-zookeeper3:2888:3888
+
+      ZOOKEEPER_SSL_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
+      ZOOKEEPER_SSL_QUORUM_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
+
+      ZOOKEEPER_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      ZOOKEEPER_SSL_QUORUM_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+
+      ZOOKEEPER_SSL_CLIENT_AUTH: need
+      ZOOKEEPER_SSL_QUORUM_CLIENT_AUTH: need
+      ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
+      
+      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/zookeeper/secrets/zookeeper_jaas.conf
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 512M
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: zookeeper
+        target: /etc/zookeeper/secrets
+        read_only: true
+
+    healthcheck:
+      test: echo srvr | nc localhost 2181 || exit 1
+      retries: 20
+      interval: 10s
+    networks:
+      - app-network
+
+  centralized-log-kafka-zookeeper3:
+    image: ${REPOSITORY}/cp-zookeeper:${CONFLUENT_DOCKER_TAG}
+    restart: always
+    depends_on:
+      centralized-log-kafka-zookeeper2:
+        condition: service_healthy
+    container_name: centralized-log-kafka-zookeeper3
+    user: "1005"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      
+      ZOOKEEPER_TICK_TIME: 2000
+      
+      ZOOKEEPER_SECURE_CLIENT_PORT: 2182
+      
+      ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
+      
+      ZOOKEEPER_SSL_QUORUM: 'true'
+
+      ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper3.keystore.p12
+      ZOOKEEPER_SSL_KEYSTORE_PASSWORD: ${ZOOKEEPER_KEYSTORE_PASSWORD}
+      ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper3.truststore.p12
+      ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: ${ZOOKEEPER_TRUSTSTORE_PASSWORD}
+
+      ZOOKEEPER_SSL_QUORUM_KEYSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper3.keystore.p12
+      ZOOKEEPER_SSL_QUORUM_KEYSTORE_PASSWORD: ${ZOOKEEPER_KEYSTORE_PASSWORD}
+      ZOOKEEPER_SSL_QUORUM_TRUSTSTORE_LOCATION: /etc/zookeeper/secrets/keystore/centralized-log-kafka-zookeeper3.truststore.p12
+      ZOOKEEPER_SSL_QUORUM_TRUSTSTORE_PASSWORD: ${ZOOKEEPER_TRUSTSTORE_PASSWORD}
+
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+
+      ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT: 3
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: 24
+
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_PEER_PORT: 2888
+      ZOOKEEPER_LEADER_PORT: 3888
+      ZOOKEEPER_SERVERS: centralized-log-kafka-zookeeper1:2888:3888;centralized-log-kafka-zookeeper2:2888:3888;0.0.0.0:2888:3888
+
+      ZOOKEEPER_SSL_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
+      ZOOKEEPER_SSL_QUORUM_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
+
+      ZOOKEEPER_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      ZOOKEEPER_SSL_QUORUM_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+
+      ZOOKEEPER_SSL_CLIENT_AUTH: need
+      ZOOKEEPER_SSL_QUORUM_CLIENT_AUTH: need
+      ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
+      
+      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/zookeeper/secrets/zookeeper_jaas.conf
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 512M
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: zookeeper
+        target: /etc/zookeeper/secrets
+        read_only: true
+
+    healthcheck:
+      test: echo srvr | nc localhost 2181 || exit 1
+      retries: 20
+      interval: 10s
+    networks:
+      - app-network
+
+  centralized-log-kafka1:
+    image: ${REPOSITORY}/cp-server:${CONFLUENT_DOCKER_TAG}
+    restart: always
+    container_name: centralized-log-kafka1
+    user: "1005"
+    depends_on:
+      centralized-log-kafka-zookeeper1:
+        condition: service_healthy
+      centralized-log-kafka-zookeeper2:
+        condition: service_healthy
+      centralized-log-kafka-zookeeper3:
+        condition: service_healthy
+      centralized-log-kafka-openldap:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: kafka
+        target: /etc/kafka/secrets
+        read_only: true
+    command: "bash -c 'if [ ! -f /etc/kafka/secrets/keystore/centralized-log-kafka1-internal.keystore.p12 ]; then echo \"ERROR: Did not find SSL certificates in /etc/kafka/secrets/ (did you remember to run ./scripts/start.sh instead of docker-compose up -d?)\" && exit 1 ; else /etc/confluent/docker/run ; fi'"
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    healthcheck:
+      test: nc -z localhost 9876 || exit 1
+      interval: 20s
+      timeout: 20s
+      retries: 50
+    mem_limit: 1G
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9092:9092
+    environment:
+      
+      # ---------- client zookeeper settings (настройки client zookeeper)
+      KAFKA_ZOOKEEPER_CONNECT: centralized-log-kafka-zookeeper1:2182,centralized-log-kafka-zookeeper2:2182,centralized-log-kafka-zookeeper3:2182
+      # connect to zookeeper encrypted
+      # подключаться к zookeeper шифровано
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: 'true'
+      # Broker uses TLSv1.2 by-default for ZooKeeper TLS connections
+      # See note for ZOOKEEPER_SSL_ENABLED_PROTOCOLS regarding TLS 1.3 support
+      # Uncomment the following property to evaluate TLS 1.3 for Broker<->ZooKeeper
+      KAFKA_ZOOKEEPER_SSL_PROTOCOL: TLSv1.3
+      KAFKA_ZOOKEEPER_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka1-internal.keystore.p12
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka1-internal.truststore.p12
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_ZOOKEEPER_SET_ACL: 'true'
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/client_zookeeper_jaas.conf -Djava.security.krb5.conf=/etc/kafka/secrets/krb5.conf -Dsun.security.krb5.debug=true
+      # ---------
+
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+
+      KAFKA_BROKER_ID: 1
+      # стойка?
+      KAFKA_BROKER_RACK: "r1"
+      
+      # certificate authentication required
+      # требуется аутентификация по сертификату
+      KAFKA_SSL_CLIENT_AUTH: "required"
+      # what protocols are used
+      # какие протоколы используются
+      KAFKA_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      # Who is the super user for ACL by default
+      # Кто super пользователь для ACL по умл
+      KAFKA_SUPER_USERS: User:admin
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTER:SASL_SSL,EXTERNAL:SASL_SSL,FORINIT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTER
+      KAFKA_ADVERTISED_LISTENERS: INTER://centralized-log-kafka1:9562,EXTERNAL://kafka.logs.com:9092,FORINIT://centralized-log-kafka1:9876
+
+      # possible options for SASL inter-broker communication
+      # возможные варианты для SASL межброкерской связи
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      # SASL variants
+      # варианты SASL
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN, GSSAPI
+      
+      # service name for kerberos {service}/{dns}@{REALM}
+      # название service для kerberos {service}/{dns}@{REAML} 
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+
+      # for inter-broker communication (для межброкерской связи)
+      # SASL
+      # Regular BASIC (Обычный BASIC)
+      KAFKA_LISTENER_NAME_INTER_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_INTER_PLAIN_SASL_JAAS_CONFIG: |
+              org.apache.kafka.common.security.plain.PlainLoginModule required \
+              username="admin" \
+              password="${KAFKA_ADMIN_SASL_PASSWORD}" \
+              user_admin="${KAFKA_ADMIN_SASL_PASSWORD}";
+      # SSL
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka1-internal.keystore.p12
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka1-internal.truststore.p12
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+
+      # To connect clients to kafka (Для подключения клиентов к kafka)
+      # SASL
+      # Regular BASIC (Обычный BASIC)
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_LISTENER_NAME_EXTERNAL_GSSAPI_SASL_JAAS_CONFIG: |
+              com.sun.security.auth.module.Krb5LoginModule required \
+              useKeyTab=true \
+              storeKey=true \
+              keyTab="/etc/kafka/secrets/kafka.logs.com.keytab" \
+              principal="kafka/kafka.logs.com@${LDAP_DOMAIN_UPPER}";
+      # SSL
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/kafka.logs.com.keystore.p12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/kafka.logs.com.truststore.p12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+
+
+      # The default replication factor that applies to auto-created topics. You should set this to at least 2.
+      # Коэффициент репликации по умолчанию, который применяется к автоматически созданным темам. Вы должны установить это значение как минимум на 2.
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      
+      # The replication factor for the offsets topic (set higher to ensure availability). 
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      # Коэффициент репликации для раздела "смещения" (установите выше для обеспечения доступности). 
+      # Создание внутренней темы завершится неудачей до тех пор, пока размер кластера не будет соответствовать этому требованию коэффициента репликации.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+
+      # The replication factor for the Kafka topic used for Confluent Platform configuration, including licensing information. 
+      # This is used only if the topic does not already exist, and the default of 3 is appropriate for production use. 
+      # If you are using a development environment with less than 3 brokers, you must set this to the number of brokers (often 1).
+      # Коэффициент репликации для раздела Kafka, используемого для настройки платформы Confluent, включая информацию о лицензировании. 
+      # Это используется только в том случае, если тема еще не существует, и значение по умолчанию 3 подходит для производственного использования. 
+      # Если вы используете среду разработки с менее чем 3 брокерами, вы должны установить это значение равным количеству брокеров (часто 1).
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+      
+      #Specifies the replication factor for audit log topics. Use this configuration option only when creating a topic (confluent.security.event.logger.exporter.kafka.topic.create=true) that does not already exist. 
+      #If you attempt to implement this configuration after the topic already exists, no changes will occur.
+      # Задает коэффициент репликации для разделов журнала аудита. Используйте этот параметр конфигурации только при создании темы (confluent.security.event.logger.exporter.kafka.topic.create=true), которая еще не существует. 
+      # Если вы попытаетесь реализовать эту конфигурацию после того, как раздел уже существует, никаких изменений не произойдет.
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 1
+      
+      # The replication factor for the transaction topic (set higher to ensure availability). 
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      # Коэффициент репликации для темы транзакции (установите более высокий для обеспечения доступности). 
+      # Создание внутренней темы завершится неудачей до тех пор, пока размер кластера не будет соответствовать этому требованию коэффициента репликации.
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+
+      # Overridden min.insync.replicas config for the transaction topic.
+      # Сколько replic должны признать запись
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # Specifies the replication factor for the topics the Self-Balancing uses to store internal state
+      # Задает коэффициент репликации для разделов, используемых самобалансирующейся системой для хранения внутреннего состояния
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+
+      # Sets the default time to declare a broker permanently failed.
+      # When a broker disappears from the cluster, Self-Balancing will wait this length of time before declaring the broker permanently failed and rebalancing its data onto other brokers. 
+      # This is independent of what value the confluent.balancer.heal.uneven.load.trigger value is set to.
+      # Устанавливает время по умолчанию для объявления о постоянном сбое брокера.
+      # Когда брокер исчезает из кластера, самобалансировка будет ждать этот промежуток времени, прежде чем объявить брокера окончательно сброшенным и перенастроить его данные на других брокеров. 
+      # Это не зависит от того, на какое значение установлено значение confluent.balancer.heal.uneverly.load.trigger.
+      KAFKA_CONFLUENT_BALANCER_HEAL_BROKER_FAILURE_THRESHOLD_MS: 30000
+
+      # Enables delete topic. Delete topic through the admin tool will have no effect if this config is turned off
+      # Позволяет удалить тему. Удаление темы с помощью инструмента администратора не будет иметь никакого эффекта, если эта конфигурация отключена
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      
+      # Enable automatic theme creation on the server
+      # Включить автоматическое создание темы на сервере
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+
+      KAFKA_CONFLUENT_CONTROLCENTER_LICENSE_MANAGER_ENABLE: 'false'
+    networks:
+      - app-network
+    extra_hosts:
+      - "kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+      - "kerberos.kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+
+  centralized-log-kafka2:
+    image: ${REPOSITORY}/cp-server:${CONFLUENT_DOCKER_TAG}
+    restart: always
+    container_name: centralized-log-kafka2
+    user: "1005"
+    depends_on:
+      centralized-log-kafka-zookeeper1:
+        condition: service_healthy
+      centralized-log-kafka-zookeeper2:
+        condition: service_healthy
+      centralized-log-kafka-zookeeper3:
+        condition: service_healthy
+      centralized-log-kafka-openldap:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: kafka
+        target: /etc/kafka/secrets
+        read_only: true
+    command: "bash -c 'if [ ! -f /etc/kafka/secrets/keystore/centralized-log-kafka2-internal.keystore.p12 ]; then echo \"ERROR: Did not find SSL certificates in /etc/kafka/secrets/ (did you remember to run ./scripts/start.sh instead of docker-compose up -d?)\" && exit 1 ; else /etc/confluent/docker/run ; fi'"
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 1G
+    healthcheck:
+      test: nc -z localhost 9876 || exit 1
+      interval: 20s
+      timeout: 20s
+      retries: 50
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9093:9093
+    environment:
+      
+      # ---------- настройки client zookeeper
+      KAFKA_ZOOKEEPER_CONNECT: centralized-log-kafka-zookeeper1:2182,centralized-log-kafka-zookeeper2:2182,centralized-log-kafka-zookeeper3:2182
+      # подключаться к zookeeper шифровано
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: 'true'
+      # Broker uses TLSv1.2 by-default for ZooKeeper TLS connections
+      # See note for ZOOKEEPER_SSL_ENABLED_PROTOCOLS regarding TLS 1.3 support
+      # Uncomment the following property to evaluate TLS 1.3 for Broker<->ZooKeeper
+      KAFKA_ZOOKEEPER_SSL_PROTOCOL: TLSv1.3
+      KAFKA_ZOOKEEPER_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka2-internal.keystore.p12
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka2-internal.truststore.p12
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_ZOOKEEPER_SET_ACL: 'true'
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/client_zookeeper_jaas.conf -Djava.security.krb5.conf=/etc/kafka/secrets/krb5.conf -Dsun.security.krb5.debug=true
+      # ---------
+
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+
+      KAFKA_BROKER_ID: 2
+      # стойка?
+      KAFKA_BROKER_RACK: "r2"
+      
+      # требуется аутентификация по сертификату
+      KAFKA_SSL_CLIENT_AUTH: "required"
+      # какие протоколы используются
+      KAFKA_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      # Кто super пользователь для ACL по умл
+      KAFKA_SUPER_USERS: User:admin
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTER:SASL_SSL,EXTERNAL:SASL_SSL,FORINIT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTER
+      KAFKA_ADVERTISED_LISTENERS: INTER://centralized-log-kafka2:9562,EXTERNAL://kafka.logs.com:9093,FORINIT://centralized-log-kafka2:9876
+
+
+      # возможные варианты для SASL межброкерской связи
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      # варианты SASL
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN, GSSAPI
+      
+      # название service для kerberos {service}/{dns}@{REAML} 
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+
+      # для межброкерской связи
+      # SASL
+      # Обычный BASIC
+      KAFKA_LISTENER_NAME_INTER_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_INTER_PLAIN_SASL_JAAS_CONFIG: |
+              org.apache.kafka.common.security.plain.PlainLoginModule required \
+              username="admin" \
+              password="${KAFKA_ADMIN_SASL_PASSWORD}" \
+              user_admin="${KAFKA_ADMIN_SASL_PASSWORD}";
+      # SSL
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka2-internal.keystore.p12
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka2-internal.truststore.p12
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+
+      # Для подключения клиентов к kafka
+      # SASL
+      # Обычный BASIC
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_LISTENER_NAME_EXTERNAL_GSSAPI_SASL_JAAS_CONFIG: |
+              com.sun.security.auth.module.Krb5LoginModule required \
+              useKeyTab=true \
+              storeKey=true \
+              keyTab="/etc/kafka/secrets/kafka.logs.com.keytab" \
+              principal="kafka/kafka.logs.com@${LDAP_DOMAIN_UPPER}";
+      # SSL
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/kafka.logs.com.keystore.p12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/kafka.logs.com.truststore.p12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+
+
+      # The default replication factor that applies to auto-created topics. You should set this to at least 2.
+      # Коэффициент репликации по умолчанию, который применяется к автоматически созданным темам. Вы должны установить это значение как минимум на 2.
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      
+      # The replication factor for the offsets topic (set higher to ensure availability). 
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      # Коэффициент репликации для раздела "смещения" (установите выше для обеспечения доступности). 
+      # Создание внутренней темы завершится неудачей до тех пор, пока размер кластера не будет соответствовать этому требованию коэффициента репликации.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+
+      # The replication factor for the Kafka topic used for Confluent Platform configuration, including licensing information. 
+      # This is used only if the topic does not already exist, and the default of 3 is appropriate for production use. 
+      # If you are using a development environment with less than 3 brokers, you must set this to the number of brokers (often 1).
+      # Коэффициент репликации для раздела Kafka, используемого для настройки платформы Confluent, включая информацию о лицензировании. 
+      # Это используется только в том случае, если тема еще не существует, и значение по умолчанию 3 подходит для производственного использования. 
+      # Если вы используете среду разработки с менее чем 3 брокерами, вы должны установить это значение равным количеству брокеров (часто 1).
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+      
+      #Specifies the replication factor for audit log topics. Use this configuration option only when creating a topic (confluent.security.event.logger.exporter.kafka.topic.create=true) that does not already exist. 
+      #If you attempt to implement this configuration after the topic already exists, no changes will occur.
+      # Задает коэффициент репликации для разделов журнала аудита. Используйте этот параметр конфигурации только при создании темы (confluent.security.event.logger.exporter.kafka.topic.create=true), которая еще не существует. 
+      # Если вы попытаетесь реализовать эту конфигурацию после того, как раздел уже существует, никаких изменений не произойдет.
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 1
+      
+      # The replication factor for the transaction topic (set higher to ensure availability). 
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      # Коэффициент репликации для темы транзакции (установите более высокий для обеспечения доступности). 
+      # Создание внутренней темы завершится неудачей до тех пор, пока размер кластера не будет соответствовать этому требованию коэффициента репликации.
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+
+      # Overridden min.insync.replicas config for the transaction topic.
+      # Сколько replic должны признать запись
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # Specifies the replication factor for the topics the Self-Balancing uses to store internal state
+      # Задает коэффициент репликации для разделов, используемых самобалансирующейся системой для хранения внутреннего состояния
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+
+      # Sets the default time to declare a broker permanently failed.
+      # When a broker disappears from the cluster, Self-Balancing will wait this length of time before declaring the broker permanently failed and rebalancing its data onto other brokers. 
+      # This is independent of what value the confluent.balancer.heal.uneven.load.trigger value is set to.
+      # Устанавливает время по умолчанию для объявления о постоянном сбое брокера.
+      # Когда брокер исчезает из кластера, самобалансировка будет ждать этот промежуток времени, прежде чем объявить брокера окончательно сброшенным и перенастроить его данные на других брокеров. 
+      # Это не зависит от того, на какое значение установлено значение confluent.balancer.heal.uneverly.load.trigger.
+      KAFKA_CONFLUENT_BALANCER_HEAL_BROKER_FAILURE_THRESHOLD_MS: 30000
+
+      # Enables delete topic. Delete topic through the admin tool will have no effect if this config is turned off
+      # Позволяет удалить тему. Удаление темы с помощью инструмента администратора не будет иметь никакого эффекта, если эта конфигурация отключена
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      
+      # Включить автоматическое создание темы на сервере
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+
+      KAFKA_CONFLUENT_CONTROLCENTER_LICENSE_MANAGER_ENABLE: 'false'
+    networks:
+      - app-network
+    extra_hosts:
+      - "kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+      - "kerberos.kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+
+  centralized-log-kafka3:
+    image: ${REPOSITORY}/cp-server:${CONFLUENT_DOCKER_TAG}
+    restart: always
+    container_name: centralized-log-kafka3
+    user: "1005"
+    depends_on:
+      centralized-log-kafka-zookeeper1:
+        condition: service_healthy
+      centralized-log-kafka-zookeeper2:
+        condition: service_healthy
+      centralized-log-kafka-zookeeper3:
+        condition: service_healthy
+      centralized-log-kafka-openldap:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: kafka
+        target: /etc/kafka/secrets
+        read_only: true
+
+    command: "bash -c 'if [ ! -f /etc/kafka/secrets/keystore/centralized-log-kafka3-internal.keystore.p12 ]; then echo \"ERROR: Did not find SSL certificates in /etc/kafka/secrets/ (did you remember to run ./scripts/start.sh instead of docker-compose up -d?)\" && exit 1 ; else /etc/confluent/docker/run ; fi'"
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 1G
+    healthcheck:
+      test: nc -z localhost 9876 || exit 1
+      interval: 20s
+      timeout: 20s
+      retries: 50
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9094:9094
+    environment:
+      
+      # ---------- настройки client zookeeper
+      KAFKA_ZOOKEEPER_CONNECT: centralized-log-kafka-zookeeper1:2182,centralized-log-kafka-zookeeper2:2182,centralized-log-kafka-zookeeper3:2182
+      # подключаться к zookeeper шифровано
+      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: 'true'
+      # Broker uses TLSv1.2 by-default for ZooKeeper TLS connections
+      # See note for ZOOKEEPER_SSL_ENABLED_PROTOCOLS regarding TLS 1.3 support
+      # Uncomment the following property to evaluate TLS 1.3 for Broker<->ZooKeeper
+      KAFKA_ZOOKEEPER_SSL_PROTOCOL: TLSv1.3
+      KAFKA_ZOOKEEPER_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka3-internal.keystore.p12
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_ZOOKEEPER_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka3-internal.truststore.p12
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_ZOOKEEPER_SET_ACL: 'true'
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/client_zookeeper_jaas.conf -Djava.security.krb5.conf=/etc/kafka/secrets/krb5.conf -Dsun.security.krb5.debug=true
+      # ---------
+
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: INFO
+
+      KAFKA_BROKER_ID: 3
+      # стойка?
+      KAFKA_BROKER_RACK: "r3"
+      
+      # требуется аутентификация по сертификату
+      KAFKA_SSL_CLIENT_AUTH: "required"
+      # какие протоколы используются
+      KAFKA_SSL_CIPHER_SUITES: ${SSL_CIPHER_SUITES}
+      # Кто super пользователь для ACL по умл
+      KAFKA_SUPER_USERS: User:admin
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTER:SASL_SSL,EXTERNAL:SASL_SSL,FORINIT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTER
+      KAFKA_ADVERTISED_LISTENERS: INTER://centralized-log-kafka3:9562,EXTERNAL://kafka.logs.com:9094,FORINIT://centralized-log-kafka3:9876
+
+      # возможные варианты для SASL межброкерской связи
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      # варианты SASL
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN, GSSAPI
+      
+      # название service для kerberos {service}/{dns}@{REAML} 
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+
+      # для межброкерской связи
+      # SASL
+      # Обычный BASIC
+      KAFKA_LISTENER_NAME_INTER_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_LISTENER_NAME_INTER_PLAIN_SASL_JAAS_CONFIG: |
+              org.apache.kafka.common.security.plain.PlainLoginModule required \
+              username="admin" \
+              password="${KAFKA_ADMIN_SASL_PASSWORD}" \
+              user_admin="${KAFKA_ADMIN_SASL_PASSWORD}";
+      # SSL
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka3-internal.keystore.p12
+      KAFKA_LISTENER_NAME_INTER_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/centralized-log-kafka3-internal.truststore.p12
+      KAFKA_LISTENER_NAME_INTER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+
+      # Для подключения клиентов к kafka
+      # SASL
+      # Обычный BASIC
+      KAFKA_LISTENER_NAME_EXTERNAL_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_LISTENER_NAME_EXTERNAL_GSSAPI_SASL_JAAS_CONFIG: |
+              com.sun.security.auth.module.Krb5LoginModule required \
+              useKeyTab=true \
+              storeKey=true \
+              keyTab="/etc/kafka/secrets/kafka.logs.com.keytab" \
+              principal="kafka/kafka.logs.com@${LDAP_DOMAIN_UPPER}";
+      # SSL
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/keystore/kafka.logs.com.keystore.p12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_TYPE: PKCS12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/keystore/kafka.logs.com.truststore.p12
+      KAFKA_LISTENER_NAME_EXTERNAL_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_TRUSTSTORE_PASSWORD}
+
+
+      # The default replication factor that applies to auto-created topics. You should set this to at least 2.
+      # Коэффициент репликации по умолчанию, который применяется к автоматически созданным темам. Вы должны установить это значение как минимум на 2.
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      
+      # The replication factor for the offsets topic (set higher to ensure availability). 
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      # Коэффициент репликации для раздела "смещения" (установите выше для обеспечения доступности). 
+      # Создание внутренней темы завершится неудачей до тех пор, пока размер кластера не будет соответствовать этому требованию коэффициента репликации.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+
+      # The replication factor for the Kafka topic used for Confluent Platform configuration, including licensing information. 
+      # This is used only if the topic does not already exist, and the default of 3 is appropriate for production use. 
+      # If you are using a development environment with less than 3 brokers, you must set this to the number of brokers (often 1).
+      # Коэффициент репликации для раздела Kafka, используемого для настройки платформы Confluent, включая информацию о лицензировании. 
+      # Это используется только в том случае, если тема еще не существует, и значение по умолчанию 3 подходит для производственного использования. 
+      # Если вы используете среду разработки с менее чем 3 брокерами, вы должны установить это значение равным количеству брокеров (часто 1).
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+      
+      #Specifies the replication factor for audit log topics. Use this configuration option only when creating a topic (confluent.security.event.logger.exporter.kafka.topic.create=true) that does not already exist. 
+      #If you attempt to implement this configuration after the topic already exists, no changes will occur.
+      # Задает коэффициент репликации для разделов журнала аудита. Используйте этот параметр конфигурации только при создании темы (confluent.security.event.logger.exporter.kafka.topic.create=true), которая еще не существует. 
+      # Если вы попытаетесь реализовать эту конфигурацию после того, как раздел уже существует, никаких изменений не произойдет.
+      KAFKA_CONFLUENT_SECURITY_EVENT_LOGGER_EXPORTER_KAFKA_TOPIC_REPLICAS: 1
+      
+      # The replication factor for the transaction topic (set higher to ensure availability). 
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      # Коэффициент репликации для темы транзакции (установите более высокий для обеспечения доступности). 
+      # Создание внутренней темы завершится неудачей до тех пор, пока размер кластера не будет соответствовать этому требованию коэффициента репликации.
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+
+      # Overridden min.insync.replicas config for the transaction topic.
+      # Сколько replic должны признать запись
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # Specifies the replication factor for the topics the Self-Balancing uses to store internal state
+      # Задает коэффициент репликации для разделов, используемых самобалансирующейся системой для хранения внутреннего состояния
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+
+      # Sets the default time to declare a broker permanently failed.
+      # When a broker disappears from the cluster, Self-Balancing will wait this length of time before declaring the broker permanently failed and rebalancing its data onto other brokers. 
+      # This is independent of what value the confluent.balancer.heal.uneven.load.trigger value is set to.
+      # Устанавливает время по умолчанию для объявления о постоянном сбое брокера.
+      # Когда брокер исчезает из кластера, самобалансировка будет ждать этот промежуток времени, прежде чем объявить брокера окончательно сброшенным и перенастроить его данные на других брокеров. 
+      # Это не зависит от того, на какое значение установлено значение confluent.balancer.heal.uneverly.load.trigger.
+      KAFKA_CONFLUENT_BALANCER_HEAL_BROKER_FAILURE_THRESHOLD_MS: 30000
+
+      # Enables delete topic. Delete topic through the admin tool will have no effect if this config is turned off
+      # Позволяет удалить тему. Удаление темы с помощью инструмента администратора не будет иметь никакого эффекта, если эта конфигурация отключена
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      
+      # Включить автоматическое создание темы на сервере
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+
+      KAFKA_CONFLUENT_CONTROLCENTER_LICENSE_MANAGER_ENABLE: 'false'
+
+    networks:
+      - app-network
+    extra_hosts:
+      - "kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+      - "kerberos.kafka.logs.com:${IP_KERBEROS_AND_KAFKA}"
+
+  centralized-log-kafka-init:
+    image: ${REPOSITORY}/cp-server:${CONFLUENT_DOCKER_TAG}
+    container_name: centralized-log-kafka-init
+    depends_on:
+      centralized-log-kafka1:
+        condition: service_healthy
+      centralized-log-kafka2:
+        condition: service_healthy
+      centralized-log-kafka3:
+        condition: service_healthy
+    entrypoint: [ '/bin/sh', '-c' ]
+    restart: on-failure
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server centralized-log-kafka1:9876,centralized-log-kafka2:9876,centralized-log-kafka3:9876 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server centralized-log-kafka1:9876,centralized-log-kafka2:9876,centralized-log-kafka3:9876 --create --if-not-exists --topic topic_log --replication-factor 3 --partitions 3
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server centralized-log-kafka1:9876,centralized-log-kafka2:9876,centralized-log-kafka3:9876 --list
+      "
+    networks:
+      - app-network
+
+  centralized-log-kafka-gui:
+    image: tchiotludo/akhq:0.24.0
+    container_name: centralized-log-kafka-gui
+    depends_on:
+      centralized-log-kafka1:
+        condition: service_healthy
+      centralized-log-kafka2:
+        condition: service_healthy
+      centralized-log-kafka3:
+        condition: service_healthy
+    user: "1005"
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+      - type: bind
+        source: kafka-gui/application.yml
+        target: /app/application.yml
+        read_only: true
+
+      - type: bind
+        source: kafka-gui/keystore
+        target: /keystore
+        read_only: true
+    networks:
+      - app-network
+      - nginx-network
+  
+  centralized-log-gateway-nginx:
+    image: nginx:1.23.4-bullseye
+    container_name: centralized-log-gateway-nginx
+    ports:
+      - 443:443
+    volumes:
+      - type: bind
+        source: nginx/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+
+      - type: bind
+        source: nginx/confs
+        target: /etc/nginx/conf.d
+        read_only: true
+
+      - type: bind
+        source: nginx/cert
+        target: /cert
+        read_only: true
+
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "1"
+    mem_limit: 1G
+    networks:
+      - nginx-network
+
+
+networks:
+  app-network:
+  kdc-network:
+  nginx-network:
+
+volumes:
+  elasticsearch1-data-volume:
+  elasticsearch2-data-volume:
+  elasticsearch3-data-volume:
+  elasticsearch4-data-volume:
+  
+  grafana-oss-storage-volume:
+  grafana-oss-postgresql-volume:
+
+  openldap-database-volume:
+
+  openldap-config-volume:
+
+  openldap-certs-volume:
+  openldap-to-kdc:
+  kdc-volume:
+
+  # grafana-oss-postgresql-backup-volume:
+  #   driver: local
+  #   driver_opts:
+  #     type: cifs
+  #     device: //192.168.0.102/backup/grafana
+  #     o: addr=192.168.0.102,user=somesmbuser,password=qwerty,file_mode=0700,dir_mode=0700
+  
+  # openldap-database-backup-volume:
+  #   driver: local
+  #   driver_opts:
+  #     type: cifs
+  #     device: //192.168.0.102/backup/openldap/database
+  #     o: addr=192.168.0.102,user=somesmbuser,password=qwerty,file_mode=0700,dir_mode=0700
+  
+  # openldap-config-backup-volume:
+  #   driver: local
+  #   driver_opts:
+  #     type: cifs
+  #     device: //192.168.0.102/backup/openldap/config
+  #     o: addr=192.168.0.102,user=somesmbuser,password=qwerty,file_mode=0700,dir_mode=0700
+
+  # kdc-backup-volume:
+  #   driver: local
+  #   driver_opts:
+  #     type: cifs
+  #     device: //192.168.0.102/backup/kdc
+  #     o: addr=192.168.0.102,user=somesmbuser,password=qwerty,file_mode=0700,dir_mode=0700
+
+# Windows Active Directory
+# addr=172.20.22.3,dom=someaddomain,user=someuser,password=somepass,vers=1.0,file_mode=0777,dir_mode=0777

@@ -1,0 +1,4 @@
+dn: cn=KafkaRemoteUser,ou=groups,{{ LDAP_BASE_DN }}
+changetype: modify
+add: memberuid
+memberuid: cn=alice,ou=users,{{ LDAP_BASE_DN }}
